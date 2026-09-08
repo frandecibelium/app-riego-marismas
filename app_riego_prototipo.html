@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Comunidad de Regantes Sección Primera de Marismas</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1b4332">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #eef2eb;
+    color: #1a2314;
+    padding-bottom: 40px;
+  }
+  header {
+    background: #ffffff;
+    padding: 16px;
+    border-bottom: 3px solid #2d6a4f;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  header h1 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+    color: #1b4332;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .live-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #40916c;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #52b788;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  main { max-width: 480px; margin: 0 auto; padding: 16px; display:none; }
+  
+  .section-title {
+    font-size: 13px;
+    color: #1b4332;
+    margin: 22px 0 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-left: 4px solid #2d6a4f;
+    padding-left: 8px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  
+  .card {
+    background: #ffffff;
+    border: 1px solid #d8e2dc;
+    border-top: 3px solid #52b788;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .card .label { font-size: 11px; color: #4f772d; margin: 0 0 4px; font-weight: 700; text-transform: uppercase; }
+  .card .value { font-size: 22px; font-weight: 700; margin: 0; color: #1b4332; }
+  .card .unit { font-size: 13px; color: #588157; font-weight: 600; }
+  
+  .status-ok { color: #2d6a4f; font-size: 11px; margin-top: 4px; font-weight: 600; }
+  .status-warn { color: #bc6c25; font-size: 11px; margin-top: 4px; font-weight: 600; }
+  
+  .pump {
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 2px solid #d8e2dc;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .pump.on { background: #d8f3dc; color: #1b4332; border-color: #2d6a4f; }
+  .pump.off { background: #fde2e4; color: #9b2226; border-color: #d90429; }
+  .pump.selected { outline: 3px solid #1b4332; }
+
+  .canal-btn {
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid #d8e2dc;
+    background: #ffffff;
+    cursor: pointer;
+    color: #2d6a4f;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .canal-btn.selected { border: 2px solid #1b4332; background: #e8f5e9; color: #1b4332; }
+
+  .tarea {
+    display: flex;
+    gap: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border: 1px solid #e0e5dc;
+    font-weight: 500;
+  }
+  .tarea .hora { color: #7f9a65; font-size: 11px; min-width: 40px; font-weight: 700; }
+
+  .detail-box {
+    background: #ffffff;
+    border: 1px solid #d8e2dc;
+    border-top: 4px solid #1b4332;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .detail-box .cm { font-size: 26px; font-weight: 700; margin: 4px 0; color: #1b4332; }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    font-weight: 600;
+  }
+  
+  button.primary {
+    width: 100%;
+    padding: 12px;
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  button.primary:active { opacity: 0.85; }
+
+  .error { color: #d90429; font-size: 12px; margin: 4px 0 0; display: none; font-weight: 600; }
+  
+  .fab {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 448px;
+    width: calc(100% - 32px);
+    background: #1b4332;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(27,67,50,0.3);
+  }
+
+  .toggle-row { display:flex; gap:8px; margin-bottom: 12px; }
+  .toggle-btn {
+    flex:1; padding:10px; border-radius:8px; border:1px solid #cbd5e1;
+    background:#ffffff; font-size:13px; font-weight:700; cursor:pointer; color:#475569;
+  }
+  .toggle-btn.active-open { border:2px solid #2d6a4f; color:#1b4332; background:#d8f3dc; }
+  .toggle-btn.active-close { border:2px solid #d90429; color:#9b2226; background:#fde2e4; }
+  .toggle-btn.active-on { border:2px solid #2d6a4f; color:#1b4332; background:#d8f3dc; }
+  .toggle-btn.active-off { border:2px solid #d90429; color:#9b2226; background:#fde2e4; }
+
+  /* Login */
+  #login-screen {
+    max-width: 380px;
+    margin: 60px auto 0;
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #d8e2dc;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  }
+  #login-screen .logo { text-align:center; font-size: 38px; margin-bottom: 8px; }
+  #login-screen h2 { text-align:center; font-size: 16px; margin: 0 0 4px; font-weight: 800; color: #1b4332; text-transform: uppercase; }
+  #login-screen p.sub { text-align:center; font-size: 12px; color:#588157; margin: 0 0 24px; font-weight: 700; }
+  #login-screen label { font-size:11px; color:#334155; display:block; margin-bottom:4px; font-weight: 700; text-transform: uppercase; }
+  .field { margin-bottom: 14px; }
+  #login-error { color:#d90429; font-size:12px; margin: 0 0 12px; display:none; font-weight: 600; }
+  .hint { font-size:11px; color:#64748b; text-align:center; margin-top: 16px; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="logo">🌾</div>
+  <h2>Zona Arrocería Marismas</h2>
+  <p class="sub">Sección Primera — Control de Riego</p>
+  <div class="field">
+    <label>Usuario</label>
+    <input type="text" id="login-user" placeholder="Ej. juan">
+  </div>
+  <div class="field">
+    <label>Contraseña</label>
+    <input type="password" id="login-pass" placeholder="••••••">
+  </div>
+  <p id="login-error">Usuario o contraseña incorrectos.</p>
+  <button class="primary" id="login-btn">Iniciar sesión</button>
+  <p class="hint">Usuarios autorizados: juan, maria, angel, perez, falcon, antoniocastillo, fran<br><b>Clave: 1234</b></p>
+</div>
+
+<header id="app-header" style="display:none;">
+  <div>
+    <h1>🌾 Arrozales Marismas · Riego</h1>
+    <div class="live-dot"><span class="dot"></span> Telemetría activa · Canal principal</div>
+  </div>
+  <div style="text-align:right; flex-shrink:0;">
+    <div style="font-size:12px; font-weight:700; color:#1b4332;" id="user-label"></div>
+    <div style="font-size:11px; color:#2d6a4f; cursor:pointer; font-weight:600;" id="logout-btn">Cerrar sesión</div>
+  </div>
+</header>
+
+<main id="app-main">
+
+  <div class="section-title">Niveles</div>
+  <div class="grid-2">
+    <div class="card">
+      <p class="label">Aspiración</p>
+      <p class="value">5.07 <span class="unit">m</span></p>
+      <p class="status-ok">✓ Nivel óptimo</p>
+    </div>
+    <div class="card">
+      <p class="label">Riego (Parcela)</p>
+      <p class="value">1.40 <span class="unit">m</span></p>
+      <p class="status-warn">⚠ Alerta alto</p>
+    </div>
+  </div>
+
+  <div class="section-title">Bombas</div>
+  <div class="grid-4" id="bombas"></div>
+
+  <!-- PANEL DE CONTROL DE BOMBA SELECCIONADA -->
+  <div class="detail-box" id="pump-detail" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong id="pump-detail-name" style="color:#1b4332; font-size:15px;"></strong>
+      <span style="font-size:11px; color:#588157; font-weight:600;">control de motor</span>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" id="pump-btn-on">ON (Encendida)</button>
+      <button class="toggle-btn" id="pump-btn-off">OFF (Apagada)</button>
+    </div>
+
+    <!-- OFERTA BOMBA 7 (HZ) -->
+    <div id="oferta-bomba-7-box" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed #d8e2dc;">
+      <p class="label" style="color:#1b4332;">Oferta actual (Bomba 7)</p>
+      <p style="font-size:11px; color:#588157; margin:0 0 6px; font-weight:600;">Regulación por variador (25 - 50 Hz)</p>
+      <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+        <input type="number" id="oferta-input-7" min="25" max="50" value="42" style="margin-bottom:0; max-width:120px; font-size:18px; color:#1b4332; font-weight:700;">
+        <span style="font-size:16px; font-weight:700; color:#2d6a4f;">Hz</span>
+      </div>
+      <button class="toggle-btn active-on" id="oferta-btn-7" style="width:100%; margin-top:10px; font-weight:700;">Actualizar Frecuencia B7</button>
+    </div>
+
+    <!-- OFERTA BOMBA 5 -->
+    <div id="oferta-bomba-5-box" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed #d8e2dc;">
+      <p class="label" style="color:#1b4332;">Oferta actual (Bomba 5)</p>
+      <p style="font-size:11px; color:#588157; margin:0 0 6px; font-weight:600;">Valor habitual (136 - 140)</p>
+      <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+        <input type="number" id="oferta-input-5" min="120" max="160" value="138" style="margin-bottom:0; font-size:14px; color:#1b4332; font-weight:700;">
+      </div>
+      <button class="toggle-btn active-on" id="oferta-btn-5" style="width:100%; margin-top:10px; font-weight:700;">Actualizar Oferta B5</button>
+    </div>
+  </div>
+
+  <div class="section-title">Niveles de las Colas</div>
+  <div class="card" style="margin-bottom: 14px; padding: 12px;">
+    <button class="primary" id="btn-toggle-tabla" style="background:#1b4332; margin-bottom: 10px;">📋 Ver Tabla de Niveles de Colas</button>
+    
+    <div id="tabla-niveles-container" style="display:none; margin-top: 10px; overflow-x: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11px; font-weight: 700; color: #4f772d; text-transform: uppercase;">Valores de referencia (Modificables)</span>
+        <button id="btn-editar-tabla" class="toggle-btn" style="padding: 4px 10px; font-size: 11px; flex:0 0 auto;">✏️ Editar</button>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;" id="tabla-niveles-colas">
+        <thead>
+          <tr style="background: #2d6a4f; color: white;">
+            <th style="padding: 8px; border: 1px solid #cbd5e1;">Canal</th>
+            <th style="padding: 8px; border: 1px solid #cbd5e1;">Punto</th>
+            <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;">Nivel (cm)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-niveles">
+          <!-- Generado por JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-title">Abrir / Cerrar Canal</div>
+  <div class="grid-4" id="canales"></div>
+  
+  <div class="detail-box" id="detail" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong id="detail-name" style="color:#1b4332; font-size:15px;"></strong>
+      <span style="font-size:11px; color:#588157; font-weight:600;">referencia histórica</span>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active-open" id="btn-abrir">Abrir</button>
+      <button class="toggle-btn" id="btn-cerrar">Cerrar</button>
+    </div>
+
+    <div id="ref-info">
+      <p class="cm"><span id="detail-cm"></span> <span style="font-size:13px; font-weight:600; color:#588157;">cm</span></p>
+      <p style="font-size:12px; color:#4f772d; margin:0 0 12px; font-weight:500;" id="ref-text">Medida habitual de apertura del repartidor en años anteriores.</p>
+    </div>
+
+    <label style="font-size:11px; color:#334155; font-weight:700; text-transform:uppercase;" id="cm-label">Cm aplicados hoy</label>
+    <input type="number" id="cm-input" placeholder="Ej. 40">
+    <p class="error" id="error-msg">Introduce los cm correctamente.</p>
+    <button class="primary" id="confirm-btn">Registrar Acción</button>
+  </div>
+
+  <div class="section-title">Tarea del Día</div>
+  <div id="tareas"></div>
+
+  <div class="section-title">Histórico</div>
+  <div style="display:flex; gap:8px; margin-bottom: 12px;">
+    <input type="date" id="fecha-buscar" style="margin-bottom:0;">
+    <button class="toggle-btn" id="ver-todo-btn" style="flex:0 0 auto; padding:10px 14px; font-weight:700;">Ver todo</button>
+  </div>
+  <div id="historico"></div>
+
+</main>
+
+<button class="fab" id="fab-btn" style="display:none;" onclick="document.getElementById('canales').scrollIntoView({behavior:'smooth'})">+ Registrar Acción en Campo</button>
+
+<script>
+const usuarios = [
+  {user:'juan', pass:'1234', nombre:'Juan'},
+  {user:'maria', pass:'1234', nombre:'María'},
+  {user:'angel', pass:'1234', nombre:'Angel'},
+  {user:'perez', pass:'1234', nombre:'Pérez'},
+  {user:'falcon', pass:'1234', nombre:'Falcón'},
+  {user:'antoniocastillo', pass:'1234', nombre:'Antonio Castillo'},
+  {user:'fran', pass:'1234', nombre:'Fran'}
+];
+let currentUser = null;
+
+document.getElementById('login-btn').onclick = () => {
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const found = usuarios.find(x => x.user === u && x.pass === p);
+  const err = document.getElementById('login-error');
+  if (!found) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  currentUser = found;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-header').style.display = 'flex';
+  document.getElementById('app-main').style.display = 'block';
+  document.getElementById('fab-btn').style.display = 'block';
+  document.getElementById('user-label').textContent = found.nombre;
+};
+
+document.getElementById('logout-btn').onclick = () => {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'block';
+  document.getElementById('app-header').style.display = 'none';
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('fab-btn').style.display = 'none';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+};
+
+const bombasData = [1,2,3,4,5,6,7,8].map(n => ({n, on: n !== 3 && n !== 6}));
+let selectedPump = null;
+
+const bombasEl = document.getElementById('bombas');
+const pumpDetail = document.getElementById('pump-detail');
+const pumpDetailName = document.getElementById('pump-detail-name');
+const pumpBtnOn = document.getElementById('pump-btn-on');
+const pumpBtnOff = document.getElementById('pump-btn-off');
+const ofertaBomba7Box = document.getElementById('oferta-bomba-7-box');
+const ofertaBomba5Box = document.getElementById('oferta-bomba-5-box');
+
+function renderBombas() {
+  bombasEl.innerHTML = '';
+  bombasData.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'pump ' + (b.on ? 'on' : 'off') + (selectedPump && selectedPump.n === b.n ? ' selected' : '');
+    div.textContent = 'B' + b.n;
+    div.onclick = () => {
+      selectedPump = b;
+      renderBombas();
+      pumpDetailName.textContent = 'Bomba ' + b.n;
+      pumpDetail.style.display = 'block';
+      
+      if (b.on) {
+        pumpBtnOn.className = 'toggle-btn active-on';
+        pumpBtnOff.className = 'toggle-btn';
+      } else {
+        pumpBtnOn.className = 'toggle-btn';
+        pumpBtnOff.className = 'toggle-btn active-off';
+      }
+
+      if (b.n === 7) {
+        ofertaBomba7Box.style.display = 'block';
+        ofertaBomba5Box.style.display = 'none';
+      } else if (b.n === 5) {
+        ofertaBomba7Box.style.display = 'none';
+        ofertaBomba5Box.style.display = 'block';
+      } else {
+        ofertaBomba7Box.style.display = 'none';
+        ofertaBomba5Box.style.display = 'none';
+      }
+      pumpDetail.scrollIntoView({behavior:'smooth', block:'nearest'});
+    };
+    bombasEl.appendChild(div);
+  });
+}
+renderBombas();
+
+function setPumpState(estado) {
+  if (!selectedPump) return;
+  selectedPump.on = estado;
+  renderBombas();
+  if (estado) {
+    pumpBtnOn.className = 'toggle-btn active-on';
+    pumpBtnOff.className = 'toggle-btn';
+  } else {
+    pumpBtnOn.className = 'toggle-btn';
+    pumpBtnOff.className = 'toggle-btn active-off';
+  }
+
+  const now = new Date();
+  const hora = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const nombre = currentUser ? currentUser.nombre : 'Usuario';
+  const accionStr = estado ? 'encendió' : 'apagó';
+  const textoLog = nombre + ' ' + accionStr + ' la bomba ' + selectedPump.n;
+
+  tareas.unshift({hora, texto: textoLog});
+  renderTareas();
+  if (historicoData.length > 0) {
+    historicoData[0].tareas.unshift({hora, texto: textoLog});
+  }
+  renderHistorico(document.getElementById('fecha-buscar').value || null);
+}
+
+pumpBtnOn.onclick = () => setPumpState(true);
+pumpBtnOff.onclick = () => setPumpState(false);
+
+document.getElementById('oferta-btn-7').onclick = () => {
+  const val = document.getElementById('oferta-input-7').value.trim();
+  if (!val || isNaN(val)) return;
+  let hz = parseInt(val);
+  if (hz < 25) hz = 25;
+  if (hz > 50) hz = 50;
+  document.getElementById('oferta-input-7').value = hz;
+  
+  const now = new Date();
+  const hora = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const nombre = currentUser ? currentUser.nombre : 'Usuario';
+  const textoLog = nombre + ' ajustó la oferta de la Bomba 7 a ' + hz + ' Hz';
+  
+  tareas.unshift({hora, texto: textoLog});
+  renderTareas();
+  if (historicoData.length > 0) {
+    historicoData[0].tareas.unshift({hora, texto: textoLog});
+  }
+  renderHistorico(document.getElementById('fecha-buscar').value || null);
+};
+
+document.getElementById('oferta-btn-5').onclick = () => {
+  const val = document.getElementById('oferta-input-5').value.trim();
+  if (!val || isNaN(val)) return;
+  
+  const now = new Date();
+  const hora = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const nombre = currentUser ? currentUser.nombre : 'Usuario';
+  const textoLog = nombre + ' actualizó la oferta de la Bomba 5 a ' + val;
+  
+  tareas.unshift({hora, texto: textoLog});
+  renderTareas();
+  if (historicoData.length > 0) {
+    historicoData[0].tareas.unshift({hora, texto: textoLog});
+  }
+  renderHistorico(document.getElementById('fecha-buscar').value || null);
+};
+
+const canales = [
+  {n:'A', cm:35}, {n:'BN', cm:28}, {n:'C', cm:40}, {n:'CN', cm:22},
+  {n:'D', cm:30}, {n:'DN', cm:26}, {n:'E', cm:38}, {n:'EN', cm:24},
+  {n:'F', cm:42}, {n:'FN', cm:20}, {n:'G', cm:33}, {n:'H', cm:29}
+];
+const canalesEl = document.getElementById('canales');
+const detail = document.getElementById('detail');
+const detailName = document.getElementById('detail-name');
+const detailCm = document.getElementById('detail-cm');
+const refInfo = document.getElementById('ref-info');
+const refText = document.getElementById('ref-text');
+const cmInput = document.getElementById('cm-input');
+const cmLabel = document.getElementById('cm-label');
+const errorMsg = document.getElementById('error-msg');
+const tareasEl = document.getElementById('tareas');
+const btnAbrir = document.getElementById('btn-abrir');
+const btnCerrar = document.getElementById('btn-cerrar');
+let selected = null;
+let accion = 'abrir';
+
+let tareas = [
+  {hora:'08:15', texto:'Juan cerró 1 cm el repartidor del canal A'},
+  {hora:'09:40', texto:'María abrió 3 cm el repartidor del canal C'},
+  {hora:'11:20', texto:'Juan encendió la bomba 6'}
+];
+
+function renderTareas() {
+  tareasEl.innerHTML = '';
+  tareas.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'tarea';
+    div.innerHTML = '<span class="hora">' + t.hora + '</span><span>' + t.texto + '</span>';
+    tareasEl.appendChild(div);
+  });
+}
+renderTareas();
+
+const historicoData = [
+  {fecha:'2026-09-07', tareas:[
+    {hora:'07:30', texto:'María abrió 40 cm el repartidor del canal F'},
+    {hora:'12:10', texto:'Juan encendió la bomba 3'},
+    {hora:'18:45', texto:'Juan cerró 5 cm el repartidor del canal D'}
+  ]},
+  {fecha:'2026-09-06', tareas:[
+    {hora:'08:00', texto:'Juan abrió 35 cm el repartidor del canal A'},
+    {hora:'16:20', texto:'María cerró el repartidor del canal G'}
+  ]},
+  {fecha:'2026-09-05', tareas:[
+    {hora:'09:15', texto:'María abrió 28 cm el repartidor del canal BN'}
+  ]}
+];
+
+function formatFecha(f) {
+  const d = new Date(f + 'T00:00:00');
+  return d.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+}
+
+function renderHistorico(filtroFecha) {
+  const cont = document.getElementById('historico');
+  cont.innerHTML = '';
+  const dias = filtroFecha ? historicoData.filter(d => d.fecha === filtroFecha) : historicoData;
+  if (dias.length === 0) {
+    cont.innerHTML = '<p style="font-size:13px; color:#588157; font-weight:600;">No hay tareas registradas ese día.</p>';
+    return;
+  }
+  dias.forEach(dia => {
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '14px';
+    const title = document.createElement('div');
+    title.style.fontSize = '12px';
+    title.style.fontWeight = '800';
+    title.style.color = '#1b4332';
+    title.style.margin = '0 0 6px';
+    title.style.textTransform = 'capitalize';
+    title.textContent = formatFecha(dia.fecha);
+    wrap.appendChild(title);
+    dia.tareas.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'tarea';
+      row.innerHTML = '<span class="hora">' + t.hora + '</span><span>' + t.texto + '</span>';
+      wrap.appendChild(row);
+    });
+    cont.appendChild(wrap);
+  });
+}
+renderHistorico(null);
+
+document.getElementById('fecha-buscar').onchange = (e) => {
+  renderHistorico(e.target.value);
+};
+document.getElementById('ver-todo-btn').onclick = () => {
+  document.getElementById('fecha-buscar').value = '';
+  renderHistorico(null);
+};
+
+function setAccion(nueva) {
+  accion = nueva;
+  if (accion === 'abrir') {
+    btnAbrir.className = 'toggle-btn active-open';
+    btnCerrar.className = 'toggle-btn';
+    refInfo.style.display = 'block';
+    cmLabel.textContent = 'Cm aplicados hoy';
+    cmInput.placeholder = 'Ej. ' + selected.cm;
+  } else {
+    btnAbrir.className = 'toggle-btn';
+    btnCerrar.className = 'toggle-btn active-close';
+    refInfo.style.display = 'none';
+    cmLabel.textContent = 'Cm cerrados';
+    cmInput.placeholder = 'Ej. ' + Math.min(selected.cm, 5);
+  }
+  cmInput.value = '';
+  errorMsg.style.display = 'none';
+}
+
+btnAbrir.onclick = () => setAccion('abrir');
+btnCerrar.onclick = () => setAccion('cerrar');
+
+canales.forEach(c => {
+  const btn = document.createElement('button');
+  btn.className = 'canal-btn';
+  btn.textContent = c.n;
+  btn.onclick = () => {
+    document.querySelectorAll('.canal-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selected = c;
+    detailName.textContent = 'Canal ' + c.n;
+    detailCm.textContent = c.cm;
+    detail.style.display = 'block';
+    setAccion('abrir');
+    detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+  };
+  canalesEl.appendChild(btn);
+});
+
+document.getElementById('confirm-btn').onclick = () => {
+  const val = cmInput.value.trim();
+  if (!val || isNaN(val)) {
+    errorMsg.style.display = 'block';
+    return;
+  }
+  errorMsg.style.display = 'none';
+  const now = new Date();
+  const hora = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const nombre = currentUser ? currentUser.nombre : 'Usuario';
+  const verbo = accion === 'abrir' ? 'abrió' : 'cerró';
+  const textoLog = nombre + ' ' + verbo + ' ' + val + ' cm el repartidor del canal ' + selected.n;
+  
+  tareas.unshift({hora, texto: textoLog});
+  renderTareas();
+  if (historicoData.length > 0) {
+    historicoData[0].tareas.unshift({hora, texto: textoLog});
+  }
+  renderHistorico(document.getElementById('fecha-buscar').value || null);
+  detail.style.display = 'none';
+};
+
+const nivelesColasData = [
+  {canal: "PUNTILLA", punto: "BOMBA", nivel: 0},
+  {canal: "COLA", punto: "VALVULA COLA", nivel: 50},
+  {canal: "A", punto: "VALVULA COLA", nivel: 74},
+  {canal: "BN", punto: "PUENTE", nivel: 26},
+  {canal: "C", punto: "2 (D)", nivel: 73},
+  {canal: "CN", punto: "12 (I)", nivel: 93},
+  {canal: "D", punto: "14 (D)", nivel: 81},
+  {canal: "DN", punto: "8 (I)", nivel: 81},
+  {canal: "E", punto: "9 (I)", nivel: 70},
+  {canal: "EN", punto: "5 (I)", nivel: 73},
+  {canal: "F", punto: "13 (I)", nivel: 90},
+  {canal: "FN", punto: "10 (I)", nivel: 103},
+  {canal: "G", punto: "9 (I)", nivel: 90},
+  {canal: "H", punto: "4 (D)", nivel: 91}
+];
+let editandoTabla = false;
+
+const btnToggleTabla = document.getElementById('btn-toggle-tabla');
+const tablaContainer = document.getElementById('tabla-niveles-container');
+const btnEditarTabla = document.getElementById('btn-editar-tabla');
+const tbodyNiveles = document.getElementById('tbody-niveles');
+
+btnToggleTabla.onclick = () => {
+  if (tablaContainer.style.display === 'none') {
+    tablaContainer.style.display = 'block';
+    btnToggleTabla.textContent = '📋 Ocultar Tabla de Niveles';
+    renderTablaNiveles();
+  } else {
+    tablaContainer.style.display = 'none';
+    btnToggleTabla.textContent = '📋 Ver Tabla de Niveles de Colas';
+  }
+};
+
+function renderTablaNiveles() {
+  tbodyNiveles.innerHTML = '';
+  nivelesColasData.forEach((item, index) => {
+    const tr = document.createElement('tr');
+    tr.style.background = index % 2 === 0 ? '#f8fafc' : '#ffffff';
+    
+    if (editandoTabla) {
+      tr.innerHTML = `
+        <td style="padding: 6px; border: 1px solid #cbd5e1;"><input type="text" value="${item.canal}" data-index="${index}" data-field="canal" style="margin-bottom:0; padding:4px; font-size:12px;"></td>
+        <td style="padding: 6px; border: 1px solid #cbd5e1;"><input type="text" value="${item.punto}" data-index="${index}" data-field="punto" style="margin-bottom:0; padding:4px; font-size:12px;"></td>
+        <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;"><input type="number" value="${item.nivel}" data-index="${index}" data-field="nivel" style="margin-bottom:0; padding:4px; font-size:12px; text-align:right; width:70px;"></td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:700; color:#1b4332;">${item.canal}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color:#334155;">${item.punto}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; font-weight:700; color:#2d6a4f;">${item.nivel} cm</td>
+      `;
+    }
+    tbodyNiveles.appendChild(tr);
+  });
+}
+
+btnEditarTabla.onclick = () => {
+  editandoTabla = !editandoTabla;
+  if (editandoTabla) {
+    btnEditarTabla.textContent = '💾 Guardar';
+    btnEditarTabla.className = 'toggle-btn active-on';
+  } else {
+    const inputs = tbodyNiveles.querySelectorAll('input');
+    inputs.forEach(input => {
+      const idx = input.getAttribute('data-index');
+      const field = input.getAttribute('data-field');
+      if (field === 'nivel') {
+        nivelesColasData[idx][field] = Number(input.value) || 0;
+      } else {
+        nivelesColasData[idx][field] = input.value;
+      }
+    });
+    btnEditarTabla.textContent = '✏️ Editar';
+    btnEditarTabla.className = 'toggle-btn';
+    
+    const now = new Date();
+    const hora = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    const nombre = currentUser ? currentUser.nombre : 'Usuario';
+    const textoLog = nombre + ' actualizó la tabla de Niveles de las Colas';
+    tareas.unshift({hora, texto: textoLog});
+    renderTareas();
+  }
+  renderTablaNiveles();
+};
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
