@@ -1,7 +1,7 @@
 const CACHE_NAME = 'regantes-marismas-v1';
 const urlsToCache = [
-  './app_riego_prototipo.html',
-  './manifest.json',
+  './app_riego_prototipo-5.html',
+  './.json',
   './icon-192.png',
   './icon-512.png'
 ];
